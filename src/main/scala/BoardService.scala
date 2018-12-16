@@ -18,18 +18,19 @@ object BoardService {
 
 
   private def genBoard(sizeX: Int, sizeY: Int, mines: Int): Array[Array[BoardElement]] = {
-    var totalMines = mines
-    (1 to sizeY).map(_ =>
-      (1 to sizeX).map(_ =>  {
-        if(totalMines > 0 && Random.nextBoolean()) {
-          totalMines-=1
-          Bomb
-        } else {
-          Empty
-        }
+    //TODO: The recursive function is inneficient on a large matrix with lot's of bombs
+    val arr: Array[Array[BoardElement]] = Array.fill(sizeY)(Array.fill(sizeX)(Empty))
+    def placeMine(arr: Array[Array[BoardElement]]): Array[Array[BoardElement]] = {
+      val x = Random.nextInt(sizeX)
+      val y = Random.nextInt(sizeX)
+      arr(x)(y) match {
+        case Bomb => placeMine(arr)
+        case Empty =>
+          arr(x)(y) = Bomb
+          arr
       }
-      ).toArray[BoardElement]
-    ).toArray
+    }
+    (1 to mines).foldLeft(arr)((x, _) => placeMine(x))
   }
 
   def createBoard(sizeX: Int = 10, sizeY: Int = 10)(mines: Int = (sizeX*sizeY*0.1).toInt): Board = {
