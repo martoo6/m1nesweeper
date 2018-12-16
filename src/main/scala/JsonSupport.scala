@@ -25,7 +25,7 @@ trait JsonSupport extends SprayJsonSupport {
         case Bomb => JsString("Bomb")
         case Unknown => JsString("Unknown")
         case Empty => JsString("Empty")
-        case RedFlag => JsString("RedFlag")
+        case Flag => JsString("RedFlag")
       }
     }
 

@@ -54,6 +54,19 @@ object WebServer extends HttpApp with JsonSupport {
                 }
               }
             }
+          } ~
+          path(IntNumber / IntNumber / "flag") { (x, y) =>
+            post {
+              parameters('pretty.as[Boolean] ? false) { pretty =>
+                complete {
+                  GameService.flag(id, x, y) match {
+                    case Some(Right(game)) => if(pretty) GamePrettyResponse.fromGame(game).userBoard else game.userBoard
+                    case Some(Left(err)) => HttpResponse(BadRequest, entity = err)
+                    case None => HttpResponse(NotFound)
+                  }
+                }
+              }
+            }
           }
       }
   }

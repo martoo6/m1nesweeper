@@ -37,17 +37,25 @@ object Game {
       }
     }
 
-    def getBombCount(x: Int, y: Int, realBoard: Board) =
-        getValidPositions(x, y, realBoard.length) count { case (pX, pY) => realBoard(pY)(pX) == Bomb }
+    def getBombCount(x: Int, y: Int) =
+        getValidPositions(x, y, board.length) count { case (pX, pY) => board(pY)(pX) == Bomb }
 
     //TODO: non functional seems just wrong
     (1 to mines).foreach(_ => placeMine())
 
     for(y <- board.indices; x <- board.indices){
-      if(board(y)(x) == null) board(y)(x) = Number(getBombCount(x, y, board))
+      if(board(y)(x) == null) board(y)(x) = Number(getBombCount(x, y))
     }
 
     board
+  }
+
+  def win(userBoard: Board, realBoard: Board) = userBoard.zip(realBoard).forall { case (userCol, realCol) =>
+    userCol.zip(realCol).forall {
+      case (userValue, realValue) =>
+        (userValue == Flag && realValue == Bomb) || userValue.isInstanceOf[Number]
+      case _ => false
+    }
   }
 
   def build(size: Int, mines: Int): Game = {

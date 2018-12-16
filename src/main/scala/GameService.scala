@@ -19,11 +19,13 @@ object GameService {
     game
   }
 
+  def isValidPosition(x: Int, y:Int, size: Int) = x >= 0 && x < size && y >= 0 && y < size
+
   def click(id: String, posX: Int, posY: Int) = {
     games.get(id).map {
       case Game(_, _, _, state, _) if state != Playing => Left("Game finished")
-      case Game(_, _, realBoard, _, _) if posX <= 0 && posX > realBoard.length && posY <= 0 && posY > realBoard.length => Left(s"Invalid position")
-      case Game(_, userBoard, _, _, _) if userBoard(posY)(posX) == RedFlag => Left("Can't click on flag")
+      case Game(_, _, realBoard, _, _) if !isValidPosition(posX, posY, realBoard.length) => Left(s"Invalid position")
+      case Game(_, userBoard, _, _, _) if userBoard(posY)(posX) == Flag => Left("Can't click on flag")
       case Game(_, userBoard, _, _, _) if userBoard(posY)(posX).isInstanceOf[Number] => Left("Can't click on number")
 
       case game @ Game(_, userBoard, realBoard, _, _) if realBoard(posY)(posX) == Bomb =>
@@ -49,21 +51,34 @@ object GameService {
 
         setElement(posX, posY)
 
-        val win = userBoard.zip(realBoard).forall { case (userCol, realCol) =>
-          userCol.zip(realCol).forall {
-            case (userValue, realValue) =>
-              (userValue == RedFlag && realValue == Bomb) || userValue.isInstanceOf[Number]
-            case _ => false
-          }
-        }
-
-        if(win) {
+        if(Game.win(userBoard, realBoard)) {
           val wonGame = game.copy(state = Won)
           games(id) = wonGame
           Right(wonGame)
         } else {
           Right(game)
         }
+    }
+  }
+
+  def flag(id: String, posX: Int, posY: Int) = {
+    games.get(id).map { case game @ Game(_, userBoard, realBoard, state, _) =>
+      if (state != Playing) Left("Game finished")
+      else if (!isValidPosition(posX, posY, realBoard.length)) Left("Invalid position")
+      else if (userBoard(posY)(posX).isInstanceOf[Number]) Left("Can't click on number")
+      else if (userBoard(posY)(posX) == Flag) {
+        game.userBoard(posY)(posX) = Unknown
+        Right(game)
+      } else {
+        game.userBoard(posY)(posX) = Flag
+        if (Game.win(userBoard, realBoard)) {
+          val wonGame = game.copy(state = Won)
+          games(id) = wonGame
+          Right(wonGame)
+        } else {
+          Right(game)
+        }
+      }
     }
   }
 }

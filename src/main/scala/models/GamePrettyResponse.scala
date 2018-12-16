@@ -6,7 +6,7 @@ object GamePrettyResponse {
   def boardPrettyPrint(board: Array[Array[BoardElement]]) =
     board.map(row => {
       row map {
-        case RedFlag => "F"
+        case Flag => "F"
         case Unknown => " "
         case Explosion => "#"
         case Bomb => "*"
