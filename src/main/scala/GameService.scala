@@ -13,7 +13,7 @@ object GameService {
     games.get(id)
   }
 
-  def createGame(size: Int = 10)(mines: Int = (size*size*0.1).toInt): Game = {
+  def createGame(size: Int, mines: Int): Game = {
     val game = Game.build(size, mines)
     games += game.id -> game
     game
