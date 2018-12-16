@@ -13,24 +13,43 @@ case class Game(id: String,
 object Game {
   type Board = Array[Array[BoardElement]]
 
-  private def genBoard(sizeX: Int, sizeY: Int, mines: Int): Board = {
+  private def generateBoard(size: Int, mines: Int): Board = {
     //TODO: The recursive function is inneficient on a large matrix with lot's of bombs
-    val arr: Array[Array[BoardElement]] = Array.fill(sizeY)(Array.fill(sizeX)(Empty))
-    def placeMine(arr: Array[Array[BoardElement]]): Array[Array[BoardElement]] = {
-      val x = Random.nextInt(sizeX)
-      val y = Random.nextInt(sizeX)
-      arr(x)(y) match {
-        case Bomb => placeMine(arr)
-        case Empty =>
-          arr(x)(y) = Bomb
-          arr
+    val board: Board = Array.ofDim(size, size)
+
+    def placeMine(): Unit = {
+      val x = Random.nextInt(size)
+      val y = Random.nextInt(size)
+      board(x)(y) match {
+        case Bomb => placeMine()
+        case _ => board(x)(y) = Bomb
       }
     }
-    (1 to mines).foldLeft(arr)((x, _) => placeMine(x))
+
+    val positions = for {
+      x <- -1 to 1
+      y <- -1 to 1
+      if x != 0 || y !=0
+    } yield x -> y
+
+    def getBombCount(x: Int, y: Int, realBoard: Board) =
+      positions
+        .map { case (pX, pY) => (pX + x) -> (pY + y) }
+        .filter { case (pX, pY) => pX >= 0 && pX < size && pY >= 0 && pY < size }
+        .count { case (pX, pY) => realBoard(pY)(pX) == Bomb }
+
+    //TODO: non functional seems just wrong
+    (1 to mines).foreach(_ => placeMine())
+
+    for(y <- board.indices; x <- board.indices){
+      if(board(y)(x) == null) board(y)(x) = Number(getBombCount(x, y, board))
+    }
+
+    board
   }
 
   def build(size: Int, mines: Int): Game = {
     val id =  sys.env.getOrElse("ID", java.util.UUID.randomUUID().toString)
-    Game(id, Array.fill(size)(Array.fill(size)(Unknown)), genBoard(size, size, mines))
+    Game(id, Array.fill(size)(Array.fill(size)(Unknown)), generateBoard(size, mines))
   }
 }
