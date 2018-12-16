@@ -27,6 +27,7 @@ object GameService {
       case Game(_, _, realBoard, _, _) if !isValidPosition(posX, posY, realBoard.length) => Left(s"Invalid position")
       case Game(_, userBoard, _, _, _) if userBoard(posY)(posX) == Flag => Left("Can't click on flag")
       case Game(_, userBoard, _, _, _) if userBoard(posY)(posX).isInstanceOf[Number] => Left("Can't click on number")
+      case Game(_, userBoard, _, _, _) if userBoard(posY)(posX) == QuestionMark => Left("Can't click on question mark")
 
       case game @ Game(_, userBoard, realBoard, _, _) if realBoard(posY)(posX) == Bomb =>
         val loseGame = game.copy(state = Lose)
@@ -66,6 +67,7 @@ object GameService {
       if (state != Playing) Left("Game finished")
       else if (!isValidPosition(posX, posY, realBoard.length)) Left("Invalid position")
       else if (userBoard(posY)(posX).isInstanceOf[Number]) Left("Can't click on number")
+      else if (userBoard(posY)(posX) == QuestionMark) Left("Can't click on question mark")
       else if (userBoard(posY)(posX) == Flag) {
         game.userBoard(posY)(posX) = Unknown
         Right(game)
@@ -78,6 +80,22 @@ object GameService {
         } else {
           Right(game)
         }
+      }
+    }
+  }
+
+  def questionMark(id: String, posX: Int, posY: Int) = {
+    games.get(id).map { case game @ Game(_, userBoard, realBoard, state, _) =>
+      if (state != Playing) Left("Game finished")
+      else if (!isValidPosition(posX, posY, realBoard.length)) Left("Invalid position")
+      else if (userBoard(posY)(posX).isInstanceOf[Number]) Left("Can't click on number")
+      else if (userBoard(posY)(posX) == Flag) Left("Can't click on flag")
+      else if (userBoard(posY)(posX) == QuestionMark) {
+        game.userBoard(posY)(posX) = Unknown
+        Right(game)
+      } else {
+        game.userBoard(posY)(posX) = QuestionMark
+        Right(game)
       }
     }
   }
