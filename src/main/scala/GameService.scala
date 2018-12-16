@@ -1,5 +1,6 @@
 import models._
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 object GameService {
@@ -38,15 +39,13 @@ object GameService {
           realBoard(y)(x) match {
             case Number(v) =>
               userBoard(y)(x) = Number(v)
-              if(v == 0) iterate(x, y)
+              if(v == 0) {
+                Game.getValidPositions(x, y, realBoard.length)
+                  .filter { case (pX, pY) => userBoard(pY)(pX) == Unknown }
+                  .foreach { case (pX, pY) => setElement(pX, pY) }
+              }
             case _ => //Do not process
           }
-        }
-
-        def iterate(x: Int, y: Int): Unit = {
-          Game.getValidPositions(x, y, realBoard.length)
-            .filter { case (pX, pY) => userBoard(pY)(pX) == Unknown }
-            .foreach { case (pX, pY) => setElement(pX, pY) }
         }
 
         setElement(posX, posY)
