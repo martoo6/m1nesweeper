@@ -1,23 +1,19 @@
+package models
+
 import java.time.Instant
 
-import models._
-
-import scala.collection.mutable
 import scala.util.Random
 
-object BoardService {
-  private val boards = mutable.ArrayBuffer[Board]()
+case class Game(id: String,
+                userBoard: Array[Array[BoardElement]],
+                realBoard: Array[Array[BoardElement]],
+                state: BoardState = Playing,
+                timestamp: Long = Instant.now().toEpochMilli)
 
-  def getBoards() = {
-    boards.map(_.id)
-  }
+object Game {
+  type Board = Array[Array[BoardElement]]
 
-  def getBoard(id: String) = {
-    boards.find(_.id == id)
-  }
-
-
-  private def genBoard(sizeX: Int, sizeY: Int, mines: Int): Array[Array[BoardElement]] = {
+  private def genBoard(sizeX: Int, sizeY: Int, mines: Int): Board = {
     //TODO: The recursive function is inneficient on a large matrix with lot's of bombs
     val arr: Array[Array[BoardElement]] = Array.fill(sizeY)(Array.fill(sizeX)(Empty))
     def placeMine(arr: Array[Array[BoardElement]]): Array[Array[BoardElement]] = {
@@ -33,10 +29,8 @@ object BoardService {
     (1 to mines).foldLeft(arr)((x, _) => placeMine(x))
   }
 
-  def createBoard(size: Int = 10)(mines: Int = (size*size*0.1).toInt): Board = {
+  def build(size: Int, mines: Int): Game = {
     val id =  sys.env.getOrElse("ID", java.util.UUID.randomUUID().toString)
-    val board = Board(id, Array.fill(size)(Array.fill(size)(Unknown)), genBoard(size, size, mines), Playing, Instant.now().toEpochMilli)
-    boards += board
-    board
+    Game(id, Array.fill(size)(Array.fill(size)(Unknown)), genBoard(size, size, mines))
   }
 }

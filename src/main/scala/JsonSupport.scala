@@ -32,5 +32,5 @@ trait JsonSupport extends SprayJsonSupport {
     override def read(json: JsValue): BoardElement = ???
   }
 
-  implicit val boardJsonFormat = jsonFormat5(Board)
+  implicit val gameJsonFormat = jsonFormat5(Game.apply)
 }

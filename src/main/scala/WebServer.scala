@@ -10,23 +10,23 @@ object WebServer extends HttpApp with JsonSupport {
     complete {
       "OK"
     }
-  } ~ pathPrefix("boards"){
+  } ~ pathPrefix("games"){
     pathEnd {
       get {
         complete {
-          BoardService.getBoards().toList
+          GameService.getGames().toList
         }
       } ~
       post {
         complete {
-          BoardService.createBoard()()
+          GameService.createGame()()
         }
       }
     } ~
       path(Segment) { id =>
         get {
           complete {
-            BoardService.getBoard(id) match {
+            GameService.getGame(id) match {
               case Some(x) => x
               case None => HttpResponse(NotFound)
             }
