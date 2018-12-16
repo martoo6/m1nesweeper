@@ -10,6 +10,7 @@ object GamePrettyResponse {
         case Unknown => " "
         case Explosion => "#"
         case Bomb => "*"
+        case QuestionMark => "?"
         case Number(v) => v.toString
       } mkString ""
     })
