@@ -19,7 +19,7 @@ object WebServer extends HttpApp with JsonSupport {
       } ~
       post {
         complete {
-          GameService.createGame()()
+          GameService.createGame()().id
         }
       }
     } ~
