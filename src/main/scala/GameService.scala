@@ -1,6 +1,5 @@
 import models._
 
-import scala.annotation.tailrec
 import scala.collection.mutable
 
 object GameService {
@@ -49,7 +48,22 @@ object GameService {
         }
 
         setElement(posX, posY)
-        Right(game)
+
+        val win = userBoard.zip(realBoard).forall { case (userCol, realCol) =>
+          userCol.zip(realCol).forall {
+            case (userValue, realValue) =>
+              (userValue == RedFlag && realValue == Bomb) || userValue.isInstanceOf[Number]
+            case _ => false
+          }
+        }
+
+        if(win) {
+          val wonGame = game.copy(state = Won)
+          games(id) = wonGame
+          Right(wonGame)
+        } else {
+          Right(game)
+        }
     }
   }
 }
