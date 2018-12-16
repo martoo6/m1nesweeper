@@ -13,6 +13,17 @@ case class Game(id: String,
 object Game {
   type Board = Array[Array[BoardElement]]
 
+  val positions = for {
+    x <- -1 to 1
+    y <- -1 to 1
+    if x != 0 || y !=0
+  } yield x -> y
+
+  def getValidPositions(x: Int, y:Int, size: Int) =
+    positions
+      .map { case (pX, pY) => (pX + x) -> (pY + y) }
+      .filter { case (pX, pY) => pX >= 0 && pX < size && pY >= 0 && pY < size }
+
   private def generateBoard(size: Int, mines: Int): Board = {
     val board: Board = Array.ofDim(size, size)
 
@@ -26,17 +37,8 @@ object Game {
       }
     }
 
-    val positions = for {
-      x <- -1 to 1
-      y <- -1 to 1
-      if x != 0 || y !=0
-    } yield x -> y
-
     def getBombCount(x: Int, y: Int, realBoard: Board) =
-      positions
-        .map { case (pX, pY) => (pX + x) -> (pY + y) }
-        .filter { case (pX, pY) => pX >= 0 && pX < size && pY >= 0 && pY < size }
-        .count { case (pX, pY) => realBoard(pY)(pX) == Bomb }
+        getValidPositions(x, y, realBoard.length) count { case (pX, pY) => realBoard(pY)(pX) == Bomb }
 
     //TODO: non functional seems just wrong
     (1 to mines).foreach(_ => placeMine())
