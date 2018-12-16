@@ -1,5 +1,6 @@
 object Minesweeper extends App {
   override def main(args: Array[String]): Unit = {
-    WebServer.startServer("localhost", 8080)
+    val port: Int = sys.env.getOrElse("PORT", "8080").toInt
+    WebServer.startServer("0.0.0.0", port)
   }
 }
