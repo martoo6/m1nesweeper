@@ -16,6 +16,11 @@ object WebServer extends HttpApp with JsonSupport {
         complete {
           BoardService.getBoards().toList
         }
+      } ~
+      post {
+        complete {
+          BoardService.createBoard()()
+        }
       }
     } ~
       path(Segment) { id =>
