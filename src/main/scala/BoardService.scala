@@ -33,9 +33,9 @@ object BoardService {
     (1 to mines).foldLeft(arr)((x, _) => placeMine(x))
   }
 
-  def createBoard(sizeX: Int = 10, sizeY: Int = 10)(mines: Int = (sizeX*sizeY*0.1).toInt): Board = {
-    val id = java.util.UUID.randomUUID().toString
-    val board = Board(id, Array.fill(sizeY)(Array.fill(sizeX)(Unknown)), genBoard(sizeX, sizeY, mines), Playing, Instant.now().toEpochMilli)
+  def createBoard(size: Int = 10)(mines: Int = (size*size*0.1).toInt): Board = {
+    val id =  sys.env.getOrElse("ID", java.util.UUID.randomUUID().toString)
+    val board = Board(id, Array.fill(size)(Array.fill(size)(Unknown)), genBoard(size, size, mines), Playing, Instant.now().toEpochMilli)
     boards += board
     board
   }
