@@ -14,9 +14,9 @@ object Game {
   type Board = Array[Array[BoardElement]]
 
   private def generateBoard(size: Int, mines: Int): Board = {
-    //TODO: The recursive function is inneficient on a large matrix with lot's of bombs
     val board: Board = Array.ofDim(size, size)
 
+    //TODO: Inneficient on a large matrix with lot's of bombs, not checking mines <= size*size (or make sense)
     def placeMine(): Unit = {
       val x = Random.nextInt(size)
       val y = Random.nextInt(size)

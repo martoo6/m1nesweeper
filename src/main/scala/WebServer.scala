@@ -1,6 +1,7 @@
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes.NotFound
 import akka.http.scaladsl.server.{HttpApp, Route}
+import models.GamePrettyResponse
 import spray.json.DefaultJsonProtocol
 
 object WebServer extends HttpApp with JsonSupport {
@@ -17,18 +18,20 @@ object WebServer extends HttpApp with JsonSupport {
           GameService.getGames().toList
         }
       } ~
-      post {
-        complete {
-          GameService.createGame()().id
+        post {
+          complete {
+            GameService.createGame()().id
+          }
         }
-      }
     } ~
       path(Segment) { id =>
         get {
-          complete {
-            GameService.getGame(id) match {
-              case Some(x) => x
-              case None => HttpResponse(NotFound)
+          parameters('pretty.as[Boolean] ? false) { pretty =>
+            complete {
+              GameService.getGame(id) match {
+                case Some(game) => if(pretty) GamePrettyResponse.fromGame(game) else game
+                case None => HttpResponse(NotFound)
+              }
             }
           }
         }

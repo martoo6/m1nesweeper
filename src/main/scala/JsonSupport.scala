@@ -33,4 +33,5 @@ trait JsonSupport extends SprayJsonSupport {
   }
 
   implicit val gameJsonFormat = jsonFormat5(Game.apply)
+  implicit val prettyGameJsonFormat = jsonFormat5(GamePrettyResponse.apply)
 }
