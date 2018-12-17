@@ -1,86 +1,85 @@
 import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.StatusCodes.{BadRequest, NotFound}
-import akka.http.scaladsl.server.{HttpApp, Route}
+import akka.http.scaladsl.model.StatusCodes.{BadRequest, InternalServerError, NotFound}
+import akka.http.scaladsl.server.{ExceptionHandler, HttpApp, Route}
+import models.Errors._
 import models.GamePrettyResponse
-import spray.json.DefaultJsonProtocol
 
-object WebServer extends HttpApp with JsonSupport {
-  import DefaultJsonProtocol._
+object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider {
 
-  lazy val routes: Route = path("healthcheck"){
-    complete {
-      "OK"
-    }
-  } ~ pathPrefix("games"){
-    pathEnd {
-      get {
+  val exceptionHandler = ExceptionHandler {
+    //TODO: each exception should contain it's own message
+    case GameFinished => complete(HttpResponse(BadRequest, entity = "Game finished"))
+    case InvalidPosition => complete(HttpResponse(BadRequest, entity = "Invalid position"))
+    case ExistingFlag => complete(HttpResponse(BadRequest, entity = "Can't click on flag"))
+    case ExistingNumber => complete(HttpResponse(BadRequest, entity = "Can't click on number"))
+    case ExistingQuestionMark => complete(HttpResponse(BadRequest, entity = "Can't click on question mark"))
+    case NotFoundError => complete(HttpResponse(NotFound))
+    case e => println(e) //TODO: Add proper logging
+      complete(HttpResponse(InternalServerError))
+  }
+
+  lazy val routes: Route =
+    handleExceptions(exceptionHandler) {
+      path("healthcheck") {
         complete {
-          GameService.getGames().toList
+          "OK"
         }
-      } ~
-        post {
-          parameters('size.as[Int] ? 10, 'mines.as[Int].?) { (size, mines) =>
-            complete {
-              //Some simple validations
-              val totalSize = if(size < 2 || size > 100) 10 else size
-              val totalMines = mines.filter(x => x < size*size*0.8 && x > 0).getOrElse(Math.ceil(size*size*0.1).toInt)
-              GameService.createGame(totalSize, totalMines).id
-            }
-          }
-        }
-    } ~
-      pathPrefix(Segment) { id =>
+      } ~ pathPrefix("games") {
         pathEnd {
           get {
-            parameters('pretty.as[Boolean] ? false) { pretty =>
-              complete {
-                GameService.getGame(id) match {
-                  case Some(game) => if (pretty) GamePrettyResponse.fromGame(game) else game
-                  case None => HttpResponse(NotFound)
+            complete {
+              GameService.getGames().map(_.map(_.id))
+            }
+          } ~
+            post {
+              parameters('size.as[Int] ? 10, 'mines.as[Int].?) { (size, mines) =>
+                complete {
+                  //Some simple validations
+                  val totalSize = if (size < 2 || size > 100) 10 else size
+                  val totalMines = mines.filter(x => x < size * size * 0.8 && x > 0).getOrElse(Math.ceil(size * size * 0.1).toInt)
+                  GameService.createGame(totalSize, totalMines)
                 }
               }
             }
-          }
         } ~
-          path(IntNumber / IntNumber / "click") { (x, y) =>
-            post {
-              parameters('pretty.as[Boolean] ? false) { pretty =>
-                complete {
-                  GameService.click(id, x, y) match {
-                    case Some(Right(game)) => if(pretty) GamePrettyResponse.fromGame(game).userBoard else game.userBoard
-                    case Some(Left(err)) => HttpResponse(BadRequest, entity = err)
-                    case None => HttpResponse(NotFound)
+          pathPrefix(Segment) { id =>
+            pathEnd {
+              get {
+                parameters('pretty.as[Boolean] ? false) { pretty =>
+                  onSuccess(GameService.getGame(id)) { game =>
+                    if (pretty) complete(GamePrettyResponse.fromGame(game)) else complete(game)
                   }
                 }
               }
-            }
-          } ~
-          path(IntNumber / IntNumber / "flag") { (x, y) =>
-            post {
-              parameters('pretty.as[Boolean] ? false) { pretty =>
-                complete {
-                  GameService.flag(id, x, y) match {
-                    case Some(Right(game)) => if(pretty) GamePrettyResponse.fromGame(game).userBoard else game.userBoard
-                    case Some(Left(err)) => HttpResponse(BadRequest, entity = err)
-                    case None => HttpResponse(NotFound)
+            } ~
+              path(IntNumber / IntNumber / "click") { (x, y) =>
+                post {
+                  parameters('pretty.as[Boolean] ? false) { pretty =>
+                    onSuccess(GameService.click(id, x, y)) { game =>
+                        if (pretty) complete(GamePrettyResponse.fromGame(game).userBoard) else complete(game.userBoard)
+                    }
+                  }
+                }
+              } ~
+              path(IntNumber / IntNumber / "flag") { (x, y) =>
+                post {
+                  parameters('pretty.as[Boolean] ? false) { pretty =>
+                    onSuccess(GameService.flag(id, x, y)) { game =>
+                      if (pretty) complete(GamePrettyResponse.fromGame(game).userBoard) else complete(game.userBoard)
+                    }
+                  }
+                }
+              } ~
+              path(IntNumber / IntNumber / "question-mark") { (x, y) =>
+                post {
+                  parameters('pretty.as[Boolean] ? false) { pretty =>
+                    onSuccess(GameService.questionMark(id, x, y)) {
+                      game => if (pretty) complete(GamePrettyResponse.fromGame(game).userBoard) else complete(game.userBoard)
+                    }
                   }
                 }
               }
-            }
-          } ~
-          path(IntNumber / IntNumber / "question-mark") { (x, y) =>
-            post {
-              parameters('pretty.as[Boolean] ? false) { pretty =>
-                complete {
-                  GameService.questionMark(id, x, y) match {
-                    case Some(Right(game)) => if(pretty) GamePrettyResponse.fromGame(game).userBoard else game.userBoard
-                    case Some(Left(err)) => HttpResponse(BadRequest, entity = err)
-                    case None => HttpResponse(NotFound)
-                  }
-                }
-              }
-            }
           }
       }
-  }
+    }
 }

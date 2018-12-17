@@ -1,4 +1,6 @@
 package models
+import models.BoardElement._
+import models.BoardState._
 
 import java.time.Instant
 

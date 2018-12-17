@@ -1,5 +1,7 @@
 package models
 
+import models.BoardElement._
+
 case class GamePrettyResponse(id: String, userBoard: Array[String], realBoard: Array[String], state: BoardState, timestamp: Long)
 
 object GamePrettyResponse {
