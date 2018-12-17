@@ -7,12 +7,7 @@ import models.GamePrettyResponse
 object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider {
 
   val exceptionHandler = ExceptionHandler {
-    //TODO: each exception should contain it's own message
-    case GameFinished => complete(HttpResponse(BadRequest, entity = "Game finished"))
-    case InvalidPosition => complete(HttpResponse(BadRequest, entity = "Invalid position"))
-    case ExistingFlag => complete(HttpResponse(BadRequest, entity = "Can't click on flag"))
-    case ExistingNumber => complete(HttpResponse(BadRequest, entity = "Can't click on number"))
-    case ExistingQuestionMark => complete(HttpResponse(BadRequest, entity = "Can't click on question mark"))
+    case e: LogicError => complete(HttpResponse(BadRequest, entity = e.getMessage))
     case NotFoundError => complete(HttpResponse(NotFound))
     case e => println(e) //TODO: Add proper logging
       complete(HttpResponse(InternalServerError))
