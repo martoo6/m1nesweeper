@@ -206,4 +206,4 @@ Use query param `[pretty:bool]` to print a visually usefull representation fo th
 * Load all boards on startup from DB
 * Add Auth
 * Create external library  
-  
+* Add docs like swagger  
