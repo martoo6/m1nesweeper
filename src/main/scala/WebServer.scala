@@ -39,15 +39,24 @@ object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider 
             }
         } ~
           pathPrefix(Segment) { id =>
-            pathEnd {
+            path("board") {
               get {
                 parameters('pretty.as[Boolean] ? false) { pretty =>
                   onSuccess(GameService.getGame(id)) { game =>
-                    if (pretty) complete(GamePrettyResponse(game)) else complete(game)
+                    if (pretty) complete(PrettyBoardInfoResponse(game)) else complete(BoardInfoResponse(game))
                   }
                 }
               }
             } ~
+              pathEnd {
+                get {
+                  parameters('pretty.as[Boolean] ? false) { pretty =>
+                    onSuccess(GameService.getGame(id)) { game =>
+                      if (pretty) complete(GamePrettyResponse(game)) else complete(game)
+                    }
+                  }
+                }
+              } ~
               path(IntNumber / IntNumber / "click") { (x, y) =>
                 post {
                   parameters('pretty.as[Boolean] ? false) { pretty =>

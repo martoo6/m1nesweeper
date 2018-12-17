@@ -4,9 +4,10 @@
 
 | METHOD        | ENDPOINT                                    | Description                                                             | Returns
 | ------------- |---------------------------------------------| ------------------------------------------------------------------------|---------
-| GET           | /game                                       | Return all boards ids                                                   | GAME
+| GET           | /game                                       | Return all boards ids                                                   | List[String]
 | POST          | /game                                       | Create new board                                                        | BOARD_INFO
-| GET           | /game/:ID?[pretty:bool]                     | Returns board by id                                                     | Hole Game (with solution boards)
+| GET           | /game/:ID?[pretty:bool]                     | Returns game by id                                                      | GAME
+| GET           | /game/:ID/board?[pretty:bool]               | Returns board by id                                                     | BOARD_INFO
 | POST          | /game/:ID/:x/:y/click?[pretty:bool]         | Clicks on coordinate [x, y]. Returns the new board.                     | BOARD_INFO
 | POST          | /game/:ID/:x/:y/flag?[pretty:bool]          | Puts/Removes a flag on coordinate [x, y]. Returns the new board.        | BOARD_INFO
 | POST          | /game/:ID/:x/:y/question-mark?[pretty:bool] | Puts/Removes question mark on coordinate [x, y]. Returns the new board. | BOARD_INFO
