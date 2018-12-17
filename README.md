@@ -201,6 +201,7 @@ Use query param `[pretty:bool]` to print a visually usefull representation fo th
   
 ### TODO:
 
+* Tests
 * Save async to background
 * Load all boards on startup from DB
 * Add Auth
