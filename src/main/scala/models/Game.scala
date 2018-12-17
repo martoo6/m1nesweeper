@@ -1,8 +1,9 @@
 package models
 import models.BoardElement._
 import models.BoardState._
-
 import java.time.Instant
+
+import org.bson.types.ObjectId
 
 import scala.util.Random
 
@@ -61,7 +62,7 @@ object Game {
   }
 
   def build(size: Int, mines: Int): Game = {
-    val id =  sys.env.getOrElse("ID", java.util.UUID.randomUUID().toString)
+    val id =  sys.env.getOrElse("ID", new ObjectId().toHexString)
     Game(id, Array.fill(size)(Array.fill(size)(Unknown)), generateBoard(size, mines))
   }
 }
