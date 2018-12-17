@@ -1,5 +1,7 @@
 # m1nesweeper
 
+Simple minesweeper game with rest API and persistance
+
 ## REST resources
 
 | METHOD        | ENDPOINT                                    | Description                                                             | Returns
@@ -195,5 +197,10 @@ Use query param `[pretty:bool]` to print a visually usefull representation fo th
 }
 ```    
   
-  
+### TODO:
+
+* Save async to background
+* Load all boards on startup from DB
+* Add Auth
+* Create external library  
   
