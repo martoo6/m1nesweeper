@@ -1,6 +1,8 @@
 # m1nesweeper
 
-Simple minesweeper game with rest API and persistance
+Simple minesweeper game with rest API and persistance  
+Testing url: `https://m1nesweeper.herokuapp.com/healthcheck`
+
 
 ## REST resources
 
