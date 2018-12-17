@@ -3,6 +3,9 @@
 Simple minesweeper game with rest API and persistance  
 Testing url: `https://m1nesweeper.herokuapp.com/healthcheck`
 
+## How to run
+
+`sbt run`
 
 ## REST resources
 
