@@ -1,6 +1,7 @@
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes.{BadRequest, InternalServerError, NotFound}
 import akka.http.scaladsl.server.{ExceptionHandler, HttpApp, Route}
+import models.BoardInfo.{BoardInfoResponse, PrettyBoardInfoResponse}
 import models.Errors._
 import models.GamePrettyResponse
 
@@ -27,12 +28,12 @@ object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider 
             }
           } ~
             post {
-              parameters('size.as[Int] ? 10, 'mines.as[Int].?) { (size, mines) =>
-                complete {
-                  //Some simple validations
-                  val totalSize = if (size < 2 || size > 100) 10 else size
-                  val totalMines = mines.filter(x => x < size * size * 0.8 && x > 0).getOrElse(Math.ceil(size * size * 0.1).toInt)
-                  GameService.createGame(totalSize, totalMines)
+              parameters('size.as[Int] ? 10, 'mines.as[Int].?, 'pretty.as[Boolean] ? false) { (size, mines, pretty) =>
+                //Some simple validations
+                val totalSize = if (size < 2 || size > 100) 10 else size
+                val totalMines = mines.filter(x => x < size * size * 0.8 && x > 0).getOrElse(Math.ceil(size * size * 0.1).toInt)
+                onSuccess(GameService.createGame(totalSize, totalMines)) { game =>
+                  if (pretty) complete(PrettyBoardInfoResponse(game)) else complete(BoardInfoResponse(game))
                 }
               }
             }
@@ -42,7 +43,7 @@ object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider 
               get {
                 parameters('pretty.as[Boolean] ? false) { pretty =>
                   onSuccess(GameService.getGame(id)) { game =>
-                    if (pretty) complete(GamePrettyResponse.fromGame(game)) else complete(game)
+                    if (pretty) complete(GamePrettyResponse(game)) else complete(game)
                   }
                 }
               }
@@ -51,7 +52,7 @@ object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider 
                 post {
                   parameters('pretty.as[Boolean] ? false) { pretty =>
                     onSuccess(GameService.click(id, x, y)) { game =>
-                        if (pretty) complete(GamePrettyResponse.fromGame(game).userBoard) else complete(game.userBoard)
+                      if (pretty) complete(PrettyBoardInfoResponse(game)) else complete(BoardInfoResponse(game))
                     }
                   }
                 }
@@ -60,7 +61,7 @@ object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider 
                 post {
                   parameters('pretty.as[Boolean] ? false) { pretty =>
                     onSuccess(GameService.flag(id, x, y)) { game =>
-                      if (pretty) complete(GamePrettyResponse.fromGame(game).userBoard) else complete(game.userBoard)
+                      if (pretty) complete(PrettyBoardInfoResponse(game)) else complete(BoardInfoResponse(game))
                     }
                   }
                 }
@@ -68,8 +69,8 @@ object WebServer extends HttpApp with JsonSupport with ExecutionContextProvider 
               path(IntNumber / IntNumber / "question-mark") { (x, y) =>
                 post {
                   parameters('pretty.as[Boolean] ? false) { pretty =>
-                    onSuccess(GameService.questionMark(id, x, y)) {
-                      game => if (pretty) complete(GamePrettyResponse.fromGame(game).userBoard) else complete(game.userBoard)
+                    onSuccess(GameService.questionMark(id, x, y)) { game =>
+                      if (pretty) complete(PrettyBoardInfoResponse(game)) else complete(BoardInfoResponse(game))
                     }
                   }
                 }

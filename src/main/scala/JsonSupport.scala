@@ -1,5 +1,6 @@
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import models.BoardElement._
+import models.BoardInfo.{BoardInfoResponse, PrettyBoardInfoResponse}
 import models.BoardState._
 import models._
 import spray.json._
@@ -51,4 +52,7 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit val gameJsonFormat = jsonFormat5(Game.apply)
   implicit val prettyGameJsonFormat = jsonFormat5(GamePrettyResponse.apply)
+
+  implicit val boardInfoResponsesonFormat = jsonFormat4(BoardInfoResponse.apply)
+  implicit val prettyBoardInfoResponseJsonFormat = jsonFormat4(PrettyBoardInfoResponse.apply)
 }

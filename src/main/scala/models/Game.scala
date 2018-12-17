@@ -7,8 +7,8 @@ import java.time.Instant
 import scala.util.Random
 
 case class Game(id: String,
-                userBoard: Array[Array[BoardElement]],
-                realBoard: Array[Array[BoardElement]],
+                board: Array[Array[BoardElement]],
+                solution: Array[Array[BoardElement]],
                 state: BoardState = Playing,
                 timestamp: Long = Instant.now().toEpochMilli)
 

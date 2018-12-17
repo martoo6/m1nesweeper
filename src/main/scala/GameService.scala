@@ -19,7 +19,7 @@ object GameService extends ExecutionContextProvider  {
 
   def createGame(size: Int, mines: Int) = {
     val game = Game.build(size, mines)
-    GameStorage.createGame(game).map(_ => game.id)
+    GameStorage.createGame(game).map(_ => game)
   }
 
   def isValidPosition(x: Int, y:Int, size: Int) = x >= 0 && x < size && y >= 0 && y < size
@@ -69,10 +69,10 @@ object GameService extends ExecutionContextProvider  {
           else if (userBoard(posY)(posX).isInstanceOf[Number]) Future.failed(Errors.ExistingNumber)
           else if (userBoard(posY)(posX) == QuestionMark) Future.failed(Errors.ExistingQuestionMark)
           else if (userBoard(posY)(posX) == Flag) {
-            game.userBoard(posY)(posX) = Unknown
+            game.board(posY)(posX) = Unknown
             GameStorage.updateGame(game).map( _ => game)
           } else {
-            game.userBoard(posY)(posX) = Flag
+            game.board(posY)(posX) = Flag
             val returnGame = if (Game.win(userBoard, realBoard)) game.copy(state = Won) else game
             GameStorage.updateGame(returnGame).map(_ => returnGame)
           }
@@ -89,10 +89,10 @@ object GameService extends ExecutionContextProvider  {
           else if (userBoard(posY)(posX).isInstanceOf[Number]) Future.failed(Errors.ExistingNumber)
           else if (userBoard(posY)(posX) == Flag) Future.failed(Errors.ExistingQuestionMark)
           else if (userBoard(posY)(posX) == QuestionMark) {
-            game.userBoard(posY)(posX) = Unknown
+            game.board(posY)(posX) = Unknown
             GameStorage.updateGame(game).map( _ => game)
           } else {
-            game.userBoard(posY)(posX) = QuestionMark
+            game.board(posY)(posX) = QuestionMark
             GameStorage.updateGame(game).map( _ => game)
           }
       }.getOrElse(Future.failed(NotFoundError))
