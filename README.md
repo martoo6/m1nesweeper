@@ -9,7 +9,7 @@ Testing url: `https://m1nesweeper.herokuapp.com/healthcheck`
 | METHOD        | ENDPOINT                                    | Description                                                             | Returns
 | ------------- |---------------------------------------------| ------------------------------------------------------------------------|---------
 | GET           | /game                                       | Return all boards ids                                                   | List[String]
-| POST          | /game                                       | Create new board                                                        | BOARD_INFO
+| POST          | /game?[size:int][mines:int]                 | Create new board                                                        | BOARD_INFO
 | GET           | /game/:ID?[pretty:bool]                     | Returns game by id                                                      | GAME
 | GET           | /game/:ID/board?[pretty:bool]               | Returns board by id                                                     | BOARD_INFO
 | POST          | /game/:ID/:x/:y/click?[pretty:bool]         | Clicks on coordinate [x, y]. Returns the new board.                     | BOARD_INFO
